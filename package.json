@@ -1,0 +1,38 @@
+{
+  "name": "babel-plugin-m-doc",
+  "version": "0.0.1",
+  "description": "m-doc babel plugin",
+  "main": "index.js",
+  "author": {
+    "name": "Dong Xing",
+    "email": "dong.xing@outlook.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WX-DongXing/babel-plugin-m-doc.git"
+  },
+  "homepage": "https://github.com/WX-DongXing/babel-plugin-m-doc.git",
+  "keywords": [
+    "babel",
+    "plugin",
+    "doc",
+    "management",
+    "m-doc"
+  ],
+  "files": [
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=12.20.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1"
+  }
+}
