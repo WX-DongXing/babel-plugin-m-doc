@@ -1,6 +1,10 @@
-module.exports = function ({ types: t }, { name, port }) {
-  const _name = name || 'mDocSocket'
-  const _port = port || 19364
+module.exports = function ({ types: t }, option) {
+  const {
+    nameSpace = 'mDocSocket',
+    port = '12149',
+    enable = true
+  } = option || {}
+  if (!enable) return {}
   return {
     visitor: {
       Program: {
@@ -9,12 +13,12 @@ module.exports = function ({ types: t }, { name, port }) {
             '=',
             t.memberExpression(
               t.identifier('window'),
-              t.identifier(_name)
+              t.identifier(nameSpace)
             ),
             t.newExpression(
               t.identifier('WebSocket'),
               [
-                t.stringLiteral('ws://localhost:' + _port)
+                t.stringLiteral('ws://localhost:' + port)
               ]
             )
           )))
@@ -46,17 +50,40 @@ module.exports = function ({ types: t }, { name, port }) {
               }))
             }
           }
-          path.get('body').unshiftContainer('body', t.expressionStatement(t.callExpression(
-            t.memberExpression(
-              t.memberExpression(
-                t.identifier('window'),
-                t.identifier(_name)
+          path.get('body').unshiftContainer('body', t.expressionStatement(
+            t.logicalExpression(
+              '&&',
+              t.logicalExpression(
+                '&&',
+                t.memberExpression(
+                  t.identifier('window'),
+                  t.identifier(nameSpace)
+                ),
+                t.binaryExpression(
+                  '===',
+                  t.memberExpression(
+                    t.memberExpression(
+                      t.identifier('window'),
+                      t.identifier(nameSpace)
+                    ),
+                    t.identifier('readyState')
+                  ),
+                  t.numericLiteral(1)
+                )
               ),
-              t.identifier('send')
-            ), [
-              t.stringLiteral(JSON.stringify(funcElement))
-            ]
-          )))
+              t.callExpression(
+                t.memberExpression(
+                  t.memberExpression(
+                    t.identifier('window'),
+                    t.identifier(nameSpace)
+                  ),
+                  t.identifier('send')
+                ), [
+                  t.stringLiteral(JSON.stringify(funcElement))
+                ]
+              )
+            )
+          ))
         }
       }
     }
