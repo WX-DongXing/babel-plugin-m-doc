@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-m-doc",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "m-doc babel plugin",
   "main": "index.js",
   "author": {
