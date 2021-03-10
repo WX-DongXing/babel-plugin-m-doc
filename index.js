@@ -88,7 +88,7 @@ module.exports = function ({ types: t }, option) {
                   ),
                   t.identifier('send')
                 ), [
-                  t.stringLiteral('data|' + JSON.stringify(funcElement))
+                  t.stringLiteral('RECORD|' + JSON.stringify(funcElement))
                 ]
               )
             )
