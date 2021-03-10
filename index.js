@@ -9,19 +9,28 @@ module.exports = function ({ types: t }, option) {
     visitor: {
       Program: {
         enter (path) {
-          path.unshiftContainer('body', t.expressionStatement(t.assignmentExpression(
-            '=',
-            t.memberExpression(
-              t.identifier('window'),
-              t.identifier(nameSpace)
-            ),
-            t.newExpression(
-              t.identifier('WebSocket'),
-              [
-                t.stringLiteral('ws://localhost:' + port)
-              ]
+          path.unshiftContainer('body', t.expressionStatement(
+            t.assignmentExpression(
+              '=',
+              t.memberExpression(
+                t.identifier('window'),
+                t.identifier(nameSpace)
+              ),
+              t.logicalExpression(
+                '||',
+                t.memberExpression(
+                  t.identifier('window'),
+                  t.identifier(nameSpace)
+                ),
+                t.newExpression(
+                  t.identifier('WebSocket'),
+                  [
+                    t.stringLiteral('ws://localhost:' + port)
+                  ]
+                )
+              )
             )
-          )))
+          ))
         }
       },
       FunctionDeclaration (path) {
