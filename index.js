@@ -7,6 +7,23 @@ module.exports = function ({ types: t }, option) {
   if (!enable) return {}
 
   /**
+   * get inside function info in methods
+   * @param path
+   * @param fnList
+   */
+  function getInsideFns (path, fnList) {
+    path.traverse({
+      CallExpression (fnPath) {
+        const info = fnPath.get('callee').node
+        if (info) {
+          const { start, end, name, loc } = info
+          fnList.push({ start, end, name, loc })
+        }
+      }
+    })
+  }
+
+  /**
    * get comment description message
    * @param path
    * @returns {string}
@@ -122,8 +139,10 @@ module.exports = function ({ types: t }, option) {
   const functionHandler = (path) => {
     const leadingComments = path.get('leadingComments')
     if (leadingComments && leadingComments.length) {
+      const fnList = []
+      getInsideFns(path, fnList)
       const comments = getFormatComments(path, path.node.body.body)
-      const expression = getExpression(comments)
+      const expression = getExpression({ ...comments, fnList })
       path.get('body').unshiftContainer('body', expression)
     }
   }
@@ -142,8 +161,10 @@ module.exports = function ({ types: t }, option) {
         variableDeclarator && init &&
         ['FunctionExpression', 'ArrowFunctionExpression'].includes(init.node.type)
       ) {
+        const fnList = []
+        getInsideFns(path, fnList)
         const comments = getFormatComments(path, variableDeclarator)
-        const expression = getExpression(comments)
+        const expression = getExpression({ ...comments, fnList })
         init.get('body').unshiftContainer('body', expression)
       }
     }
