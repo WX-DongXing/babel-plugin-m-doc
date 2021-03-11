@@ -54,7 +54,7 @@ module.exports = function ({ types: t }, option) {
         insideComments = getInsideComments(body)
       }
     } else if (path.node.type === 'VariableDeclaration') {
-      const { name, loc } = variableDeclarator.get('id')
+      const { name, loc } = variableDeclarator.get('id').node
       Object.assign(parentComment, { name, loc })
       const body = variableDeclarator.get('init').get('body').get('body')
       if (body && body.length) {
