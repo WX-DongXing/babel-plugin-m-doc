@@ -6,6 +6,8 @@ module.exports = function ({ types: t }, option) {
   } = option || {}
   if (!enable) return {}
 
+  let file = {}
+
   /**
    * get inside function info in methods
    * @param path
@@ -142,7 +144,7 @@ module.exports = function ({ types: t }, option) {
       const fnList = []
       getInsideFns(path, fnList)
       const comments = getFormatComments(path, path.node.body.body)
-      const expression = getExpression({ ...comments, fnList })
+      const expression = getExpression({ ...comments, fnList, file })
       path.get('body').unshiftContainer('body', expression)
     }
   }
@@ -164,7 +166,7 @@ module.exports = function ({ types: t }, option) {
         const fnList = []
         getInsideFns(path, fnList)
         const comments = getFormatComments(path, variableDeclarator)
-        const expression = getExpression({ ...comments, fnList })
+        const expression = getExpression({ ...comments, fnList, file })
         init.get('body').unshiftContainer('body', expression)
       }
     }
@@ -173,7 +175,9 @@ module.exports = function ({ types: t }, option) {
   return {
     visitor: {
       Program: {
-        enter (path) {
+        enter (path, state) {
+          const { filename, cwd } = state
+          file = { filename, cwd }
           path.unshiftContainer('body', t.expressionStatement(
             t.assignmentExpression(
               '=',
