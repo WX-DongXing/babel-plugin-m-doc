@@ -17,7 +17,7 @@ module.exports = function ({ types: t }, option) {
         const info = fnPath.get('callee').node
         if (info) {
           const { start, end, name, loc } = info
-          fnList.push({ start, end, name, loc })
+          name && fnList.push({ start, end, name, loc })
         }
       }
     })
@@ -154,7 +154,7 @@ module.exports = function ({ types: t }, option) {
   const expressionHandler = (path) => {
     const leadingComments = path.get('leadingComments')
     const declarations = path.get('declarations')
-    if (leadingComments && declarations) {
+    if (leadingComments && leadingComments.length && declarations) {
       const variableDeclarator = declarations[0]
       const init = variableDeclarator.get('init')
       if (
