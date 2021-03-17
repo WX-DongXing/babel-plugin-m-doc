@@ -40,15 +40,15 @@ module.exports = function ({ types: t }, option) {
         const comment = commentLines.reduce((acc, cur) => {
           if (/@/.test(cur)) {
             const fragments = /.+?@(.+?)\s+[{<]?(.+?)[>}]?\s+?([{<](.+?)[>}]\s+?)?([\s\S]+)/.exec(cur)
-            if (fragments && fragments.length === 6) {
+            if (fragments && fragments.length === 7) {
               const result = {}
-              const [target, classify, value, types, type, desc] = fragments
+              const [target, classify, param, value, types, type, desc] = fragments
               switch (classify) {
                 case 'doc':
-                  Object.assign(result, { title: value, desc: `${value} ${desc}` })
+                  Object.assign(result, { desc: `${value || ' '}${desc}` })
                   break
                 case 'example':
-                  Object.assign(result, { [classify]: `${value} ${desc}` })
+                  Object.assign(result, { [classify]: `${value || ' '}${desc}` })
                   break
                 case 'param':
                   Object.assign(result, { [classify]: { type, value, desc } })
@@ -110,18 +110,18 @@ module.exports = function ({ types: t }, option) {
    */
   function getFormatComments (path, variableDeclarator) {
     const comment = getComment(path)
-    const parentComment = { comment, desc: comment.desc, children: [] }
+    const parentComment = { desc: comment.desc, children: [] }
     let insideComments = []
     if (['FunctionDeclaration', 'ObjectMethod'].includes(path.node.type)) {
       const { name, loc } = path.node.id || path.node.key
-      Object.assign(parentComment, { name, loc })
+      Object.assign(parentComment, { name, loc, comment: { name, ...comment } })
       const body = path.get('body').get('body')
       if (body && body.length) {
         insideComments = getInsideComments(body)
       }
     } else if (path.node.type === 'VariableDeclaration') {
       const { name, loc } = variableDeclarator.get('id').node
-      Object.assign(parentComment, { name, loc })
+      Object.assign(parentComment, { name, loc, comment: { name, ...comment } })
       const body = variableDeclarator.get('init').get('body').get('body')
       if (body && body.length) {
         insideComments = getInsideComments(body)
