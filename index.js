@@ -26,18 +26,65 @@ module.exports = function ({ types: t }, option) {
   }
 
   /**
-   * get comment description message
+   * get comment
    * @param path
    * @returns {string}
    */
-  function getDesc (path) {
+  function getComment (path) {
     return path.get('leadingComments').reduce((acc, cur) => {
-      if (/@(?:desc|func)/.test(cur.node.value)) {
-        const value = cur.node.value.replace(/(?:[\s\S]*@(?:desc|func)\s+)(.+)(?:[\S\s]+)?/, '$1')
-        acc += value
+      if (/@doc/.test(cur.node.value)) {
+        const commentLines = cur.node.value
+          .replace(/\*/g, '')
+          .match(/.+\n?/g)
+          .filter(item => !!item.trim())
+        const comment = commentLines.reduce((acc, cur) => {
+          if (/@/.test(cur)) {
+            const fragments = /.+?@(.+?)\s+[{<]?(.+?)[>}]?\s+?([{<](.+?)[>}]\s+?)?([\s\S]+)/.exec(cur)
+            if (fragments && fragments.length === 6) {
+              const result = {}
+              const [target, classify, value, types, type, desc] = fragments
+              switch (classify) {
+                case 'doc':
+                  Object.assign(result, { title: value, desc: `${value} ${desc}` })
+                  break
+                case 'example':
+                  Object.assign(result, { [classify]: `${value} ${desc}` })
+                  break
+                case 'param':
+                  Object.assign(result, { [classify]: { type, value, desc } })
+                  break
+                case 'returns':
+                  Object.assign(result, { [classify]: { type: value, desc } })
+                  break
+                default:
+                  break
+              }
+              acc.push(result)
+            }
+          } else {
+            const preResult = acc[acc.length - 1]
+            if (!preResult) {
+              return false
+            }
+            if (preResult.desc) {
+              preResult.desc += cur
+            } else if (preResult.example) {
+              preResult.example += cur
+            }
+          }
+          return acc
+        }, []).reduce((acc, cur) => {
+          if (cur.param) {
+            acc.params.push(cur.param)
+          } else {
+            Object.assign(acc, cur)
+          }
+          return acc
+        }, { params: [] })
+        Object.assign(acc, comment)
       }
       return acc
-    }, '')
+    }, { file })
   }
 
   /**
@@ -62,8 +109,8 @@ module.exports = function ({ types: t }, option) {
    * @param variableDeclarator
    */
   function getFormatComments (path, variableDeclarator) {
-    const desc = getDesc(path)
-    const parentComment = { desc, children: [] }
+    const comment = getComment(path)
+    const parentComment = { comment, desc: comment.desc, children: [] }
     let insideComments = []
     if (['FunctionDeclaration', 'ObjectMethod'].includes(path.node.type)) {
       const { name, loc } = path.node.id || path.node.key
@@ -144,7 +191,7 @@ module.exports = function ({ types: t }, option) {
       const fnList = []
       getInsideFns(path, fnList)
       const comments = getFormatComments(path, path.node.body.body)
-      const expression = getExpression({ ...comments, fnList, file })
+      const expression = getExpression({ ...comments, fnList })
       path.get('body').unshiftContainer('body', expression)
     }
   }
@@ -166,7 +213,7 @@ module.exports = function ({ types: t }, option) {
         const fnList = []
         getInsideFns(path, fnList)
         const comments = getFormatComments(path, variableDeclarator)
-        const expression = getExpression({ ...comments, fnList, file })
+        const expression = getExpression({ ...comments, fnList })
         init.get('body').unshiftContainer('body', expression)
       }
     }
