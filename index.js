@@ -39,16 +39,16 @@ module.exports = function ({ types: t }, option) {
           .filter(item => !!item.trim())
         const comment = commentLines.reduce((acc, cur) => {
           if (/@/.test(cur)) {
-            const fragments = /.+?@(.+?)\s+[{<]?(.+?)[>}]?\s+?([{<](.+?)[>}]\s+?)?([\s\S]+)/.exec(cur)
+            const fragments = /.+?@(.+?)\s+([{<]?(.+?)[>}]?\s+?)?([{<](.+?)[>}]\s+?)?([\s\S]+)/.exec(cur)
             if (fragments && fragments.length === 7) {
               const result = {}
               const [target, classify, param, value, types, type, desc] = fragments
               switch (classify) {
                 case 'doc':
-                  Object.assign(result, { desc: `${value || ' '}${desc}` })
+                  Object.assign(result, { desc: `${value ? value + ' ' : ''}${desc}` })
                   break
                 case 'example':
-                  Object.assign(result, { [classify]: `${value || ' '}${desc}` })
+                  Object.assign(result, { [classify]: `${value ? value + ' ' : ''}${desc}` })
                   break
                 case 'param':
                   Object.assign(result, { [classify]: { type, value, desc } })
