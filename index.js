@@ -114,14 +114,14 @@ module.exports = function ({ types: t }, option) {
     let insideComments = []
     if (['FunctionDeclaration', 'ObjectMethod'].includes(path.node.type)) {
       const { name, loc } = path.node.id || path.node.key
-      Object.assign(parentComment, { name, loc, comment: { name, ...comment } })
+      Object.assign(parentComment, { name, comment: { name, loc, ...comment } })
       const body = path.get('body').get('body')
       if (body && body.length) {
         insideComments = getInsideComments(body)
       }
     } else if (path.node.type === 'VariableDeclaration') {
       const { name, loc } = variableDeclarator.get('id').node
-      Object.assign(parentComment, { name, loc, comment: { name, ...comment } })
+      Object.assign(parentComment, { name, comment: { name, loc, ...comment } })
       const body = variableDeclarator.get('init').get('body').get('body')
       if (body && body.length) {
         insideComments = getInsideComments(body)
